@@ -1,22 +1,23 @@
 #!/bin/bash
 
 # check missing parmeters
-if [[ -z "$1" ]] || [[ -z "$2" ]]; then
+if [[ -z "$1" ]] || [[ -z "$2" ]] || [[ -z "$3" ]]; then
     printf "\n[!] Missing parameters!!
 Reminder: Free Oracle OCI offers a maximum of 4 cpu and 24 gb of memory per account.
 
-Usage: /bin/bash ./$0 <cpu_count> <memory_in_gb>
+Usage: /bin/bash ./$0 <instance_name> <cpu_count> <memory_in_gb>
 
 Example:
 # Build 1 CPU / 6 GB memory (can build up to 4) VPS
-/bin/bash ./$0 1 6
+/bin/bash ./$0 openvpn 1 6
 \n\n"
     exit 1
 fi
 
 # assign to
-cpu_count=$1
-memory_in_gb=$2
+instance_name=$1
+cpu_count=$2
+memory_in_gb=$3
 
 # valiate args are numbers
 re='^[0-9]+$' # regular expression - validate whole number
@@ -55,7 +56,7 @@ fi
 
 # STEP: Create VNet & Compute Instanece 
 # https://eclipsys.ca/launch-an-oci-instance-with-oci-cli-in-10-minutes/
-instance_name="vpn"
+# instance_name="vpn"
 shape="VM.Standard.A1.Flex"
 # cpu_count="1"
 # memory_in_gb="6"  
