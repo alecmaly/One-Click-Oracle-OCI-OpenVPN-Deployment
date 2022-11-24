@@ -28,9 +28,7 @@ fi
 
 
 # download configure-server.sh
-wget -s https://raw.githubusercontent.com/alecmaly/One-Click-Oracle-OCI-OpenVPN-Deployment/main/configure-server.sh -O configure-server.sh
-
-
+wget -q "https://raw.githubusercontent.com/alecmaly/One-Click-Oracle-OCI-OpenVPN-Deployment/main/configure-server.sh" -O configure-server.sh
 
 
 # SOURCE: https://eclipsys.ca/launch-an-oci-instance-with-oci-cli-in-10-minutes/
