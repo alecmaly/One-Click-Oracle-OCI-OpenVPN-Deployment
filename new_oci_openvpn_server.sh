@@ -28,7 +28,7 @@ fi
 
 
 # download configure-server.sh
-wget -s https://raw.githubusercontent.com/... -O configure-server.sh
+wget -s https://raw.githubusercontent.com/alecmaly/One-Click-Oracle-OCI-OpenVPN-Deployment/main/configure-server.sh -O configure-server.sh
 
 
 
