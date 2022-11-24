@@ -102,7 +102,8 @@ ocid_securiy_list=`oci network security-list list -c $C --query 'data[0].id' --r
 # TCP Ports 443 + 943, UDP: 1194
 echo "[+] Updating Security List firewall rules for OpenVPN"
 network_ingress_rules='[ { "description": "TCP Port 22", "source": "0.0.0.0/0", "protocol": "6", "isStateless": true, "tcpOptions": { "destinationPortRange": { "max": 22, "min": 22 } } }, { "description": "TCP Port 443", "source": "0.0.0.0/0", "protocol": "6", "isStateless": true, "tcpOptions": { "destinationPortRange": { "max": 443, "min": 443 } } }, { "description": "TCP Port 943", "source": "0.0.0.0/0", "protocol": "6", "isStateless": true, "tcpOptions": { "destinationPortRange": { "max": 943, "min": 943 } } }, { "description": "UDP Port 1194", "source": "0.0.0.0/0", "protocol": "17", "isStateless": true, "udpOptions": { "destinationPortRange": { "max": 1194, "min": 1194 } } } ]'
-oci network security-list update --security-list-id $ocid_securiy_list --ingress-security-rules "$network_ingress_rules" --force 1>&2 2>/dev/null # suppress output 
+not_used=`oci network security-list update --security-list-id $ocid_securiy_list --ingress-security-rules "$network_ingress_rules"`
+
 
 # STEP: Create Compute Instance (VM) + get public_ip
 echo "[+] Creating Computue Instance (VM / VPS)"
