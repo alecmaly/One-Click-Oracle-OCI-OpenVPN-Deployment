@@ -23,6 +23,7 @@ apt update && apt -y install openvpn-as
 
 
 # STEP: Set IP of host 
+echo "[+] Configuring Server using CLI"
 sacli --key "host.name" --value "$(curl -s ip.me)" ConfigPut
 
 # STEP: Update "VPN Settings" > DNS > Client DNS = 8.8.8.8 1.1.1.1
@@ -34,6 +35,7 @@ sacli start
 
 
 # STEP: Open Ports: needed?
+echo "[+] Updating iptable rules"
 # UDP: openvpn prefers udp port 1194, falls back to https when not open
 # SOURCE DOCS: https://openvpn.net/vpn-server-resources/advanced-option-settings-on-the-command-line/#:~:text=While%20the%20best%20connection%20for%20an%20OpenVPN%20tunnel%20is%20via%20the%20UDP%20port%2C%20we%20implement%20TCP%20443%20as%20a%20fallback%20method
 sudo iptables -I INPUT -p udp -m udp --dport 1194 -j ACCEPT
@@ -48,6 +50,7 @@ sudo netfilter-persistent save
 
 
 # STEP: Create new users - allow auto-login
+echo "[+] Creating Users + updating admin password"
 # https://openvpn.net/vpn-server-resources/managing-user-and-group-properties-from-command-line/
 username="user"
 password=`uuidgen`
@@ -70,6 +73,7 @@ sacli --user "openvpn" --new_pass "$openvpn_password" SetLocalPassword
 
 
 public_ip=`curl -s ip.me`
+echo "------- OpenVPN should be running on a fresh box! -------"
 echo "---------- Copy / paste to Password Manager -------------"
 echo "Admin  UI: https://$public_ip:943/admin"
 echo "Client UI: https://$public_ip:943"
