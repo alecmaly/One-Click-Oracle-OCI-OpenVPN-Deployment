@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# WARNING: This script clobbers the first VCN in your cloud OCI environment. 
+
 # check missing parmeters
 if [[ -z "$1" ]] || [[ -z "$2" ]] || [[ -z "$3" ]]; then
     printf "\n[!] Missing parameters!!
@@ -33,10 +35,14 @@ echo "[!] Downloading configure-server.sh, will be executed on VPN once it is RU
 wget -q "https://raw.githubusercontent.com/alecmaly/One-Click-Oracle-OCI-OpenVPN-Deployment/main/configure-server.sh" -O configure-server.sh
 
 
-# Resources:
 # SOURCE: https://eclipsys.ca/launch-an-oci-instance-with-oci-cli-in-10-minutes/
+# oci iam availability-domain list
+
+# TO DO: 
+# - Research : network chuck : client use Server
+
 # Credit: https://www.dbarj.com.br/en/2020/10/get-your-tenancy-ocid-using-a-single-oci-cli-command/
-# Oracle Docs: https://docs.oracle.com/en-us/iaas/tools/oci-cli/3.20.3/oci_cli_docs/cmdref/network/vcn/create.html
+
 
 # STEP: Create keys to get into VMs
 # TO DO: 
@@ -81,53 +87,27 @@ echo "[+] Getting (first) Availability Domain ID"
 ocid_ad=`oci iam availability-domain list -c $C --query "data[0].name" --raw-output`
 
 ######
-# Get VCN (Virtual Cloud Network)
-vcn_name="openvpn-vcn"
-echo "[+] Getting Virtual Cloud Network named: $vcn_name"
+# TO DO: Create or use VCN: openvpn-vcn 
 
-ocid_vcn=`oci network vcn list -c $C --display-name "$vcn_name" --query 'data[0].id' --raw-output`
-if [ -z "$ocid_vcn" ]; then
-    echo "[!] Virtual Cloud Network not found, creating: "$vcn_name""
-    # if ocid_vcn = empty, create new one.. + extract ocid
-    new_vcn=`oci network vcn create -c $C --display-name "$vcn_name" --cidr-blocks '[ "10.0.0.0/16" ]' --dns-label openvpndns`
-    ocid_vcn=`echo "$new_vcn" | jq -r '.data.id'`
-fi
+# Get First VCN (Virtual Cloud Network)
+echo "[+] Getting (First) Virtual Cloud Network ID"
+ocid_vcn=`oci network vcn list -c $C --query 'data[0].id' --raw-output`
 
-# Get VCN Subnet: 
-echo "[+] Getting (First) Subnet ID in Virtual Cloud Network"
+######
+# TO DO: Create or use VCN: openvpn-subnet 
+
+# Get First Subnet: 
+echo "[+] Getting (First) Subnet ID in (First) Virtual Cloud Network"
 ocid_sub=`oci network subnet list -c $C --vcn-id $ocid_vcn --query 'data[0].id' --raw-output`
-if [ -z "$ocid_sub" ]; then
-    echo "[!] Subnet not found, creating one."
-    new_vcn_sub=`oci network subnet create -c $C --vcn-id $ocid_vcn --cidr-block '10.0.0.0/24' --dns-label subnetdns`
-    ocid_sub=`echo "$new_vcn_sub" | jq -r '.data.id'`
-fi
+
 
 # TO DO: Update Subnet params to allow ports
 # https://blogs.oracle.com/cloud-infrastructure/post/a-simple-guide-to-adding-rules-to-security-lists-using-oci-cli
-echo "[+] Getting (First) Security List in VCN"
-ocid_securiy_list=`oci network security-list list -c $C --vcn-id $ocid_vcn --query 'data[0].id' --raw-output`
-
-
-## TO DO
-# Create Internet Gateway, if needed (needed for VMs to reach the internet)
-echo "[+] Getting Internet Gateway"
-gateway_name="openvpn-gw"
-ocid_gateway=`oci network internet-gateway list -c $C --display-name $gateway_name --query 'data[0].id' --raw-output`
-if [ -z "$ocid_gateway" ]; then
-    echo "[!] Internet Gateway not found, creating one."
-    new_gateway=`oci network internet-gateway create -c $C --vcn-id $ocid_vcn --is-enabled true --display-name $gateway_name`
-    ocid_gateway=`oci network internet-gateway list -c $C --display-name $gateway_name --query 'data[0].id' --raw-output`
-fi
-
-
-# Updat Default Route Table (needed for VMs to reach the internet)
-echo "[+] Setting Default Route Table"
-ocid_route_table=`oci network route-table list -c $C --vcn-id $ocid_vcn --query 'data[0].id' --raw-output`
-route_rules='[{"cidrBlock":"0.0.0.0/0","networkEntityId":"'$ocid_gateway'"}]'
-oci network route-table update --rt-id $ocid_route_table --route-rules $route_rules --force > /dev/null 2>&1
-
+echo "[+] Getting (First) Security List"
+ocid_securiy_list=`oci network security-list list -c $C --query 'data[0].id' --raw-output`
 
 # TO DO: Crate/select security-list
+
 # STEP: Update Security List (Ingress Rules)
 # Oracle example doesn't work? https://docs.oracle.com/en-us/iaas/tools/oci-cli/2.9.7/oci_cli_docs/cmdref/network/security-list/update.html#cmdoption-ingress-security-rules
 # TCP Ports 443 + 943, UDP: 1194

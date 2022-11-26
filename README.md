@@ -9,7 +9,9 @@ Note that key `id_rsa` are saved to `pwd` and can be copied offline to SSH into 
 
 # Create Server
 
-1. Get Oracle OCI account + login: [https://cloud.oracle.com](https://cloud.oracle.com)
+1. Get Oracle OCI account 
+
+2. Open Oracle Cloud Shell: [https://cloud.oracle.com?cloudshell=true](https://cloud.oracle.com?cloudshell=true)
 
 2. Copy/paste into the Oracle Cloud Shell:
 
