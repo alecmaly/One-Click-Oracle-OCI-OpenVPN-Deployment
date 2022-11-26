@@ -20,7 +20,7 @@ Note that key `id_rsa` are saved to `pwd` and can be copied offline to SSH into 
 ```bash
 # curl -s https://raw.githubusercontent.com/alecmaly/One-Click-Oracle-OCI-OpenVPN-Deployment/main/new_oci_openvpn_server.sh | /bin/bash -s -- <instance_name> <cpu_count> <memory_in_gb>
 
-curl -s https://raw.githubusercontent.com/alecmaly/One-Click-Oracle-OCI-OpenVPN-Deployment/main/new_oci_openvpn_server.sh | /bin/bash -s -- openvpn 1 6
+curl -s https://raw.githubusercontent.com/alecmaly/One-Click-Oracle-OCI-OpenVPN-Deployment/main/new_oci_openvpn_server.sh | /bin/bash -s -- openvpn-sever 1 6
 ```
 
 # Notes
