@@ -59,7 +59,8 @@ openvpn_password=`uuidgen`
 sacli --user $username --key "type" --value "user_connect" UserPropPut
 sacli --user $username --key "prop_autologin" --value "true" UserPropPut
 sacli --user "$username" --new_pass "$password" SetLocalPassword
-user_token_url=`sacli --user "$username" --token_profile="autologin" --token_usage_count="2" AddProfileToken`
+new_token_output=`sacli --user "$username" --token_profile="autologin" AddProfileToken`
+user_profile_token_url=`echo -n $new_token_output | cut -d' ' -f5`
 
 # STEP: Update admin password
 sacli --user "openvpn" --new_pass "$openvpn_password" SetLocalPassword
@@ -76,7 +77,8 @@ echo "---------- Copy / paste to Password Manager -------------"
 printf "\nAdmin  UI: https://$public_ip:943/admin\n"
 printf "Client UI: https://$public_ip:943\n\n"
 printf "Admin Credentials:\n\tusername: openvpn\n\tpassword: $openvpn_password\n"
-printf "User  Crednetials:\n\tusername: $username\n\tpassword: $password\n\t$user_token_url\n\n"
+printf "User  Crednetials:\n\tusername: $username\n\tpassword: $password\n"
+printf "\n\tUser Profile URL: $user_profile_token_url\n\tProfile QR: https://chart.apis.google.com/chart?cht=qr&chs=300x300&chl=$user_profile_token_url\n\n"
 echo "---------- + update passwords if desired ----------------"
 
 # clear .bash_history
