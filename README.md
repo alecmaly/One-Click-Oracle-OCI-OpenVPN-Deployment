@@ -4,7 +4,7 @@ This project is to simplify the process of creating OpenVPN servers on Oracle's 
 
 These scripts can fail due to limitations on resources or other unhandled exceptions. However, they work well enough for my use case, hopefully someone else can use it too and/or improve it! 
 
-Note that key `id_rsa` are saved to `pwd` and can be copied offline to SSH into each VPS. 
+Note that key `id_rsa` is saved to `pwd` and can be copied offline to SSH into each VPS. 
 
 # Create Server
 
@@ -12,7 +12,7 @@ Note that key `id_rsa` are saved to `pwd` and can be copied offline to SSH into 
 
 2. Copy/paste into the Oracle Cloud Shell:
 
-<span style='color:indianred; font-weight:bold'>Use with caution! Piping script to /bin/bash can be dangerous. Please validate all scripts before running.</span>
+<span style='color:indianred; font-weight:bold'>Use with caution! Piping scripts to /bin/bash can be dangerous. Please validate all scripts before running.</span>
 
 ```bash
 # curl -s https://raw.githubusercontent.com/alecmaly/One-Click-Oracle-OCI-OpenVPN-Deployment/main/new_oci_openvpn_server.sh | /bin/bash -s -- <instance_name> <cpu_count> <memory_in_gb>
