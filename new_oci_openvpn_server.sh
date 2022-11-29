@@ -153,8 +153,8 @@ ocid_instance=$(oci compute instance launch --display-name "${instance_name}" --
 echo "[+] VM awake, sleeping an extra 60 seconds to wake up SSH."
 sleep 60
 
-echo "[+] Getting Public IP"
 public_ip=`oci compute instance list-vnics --instance-id $ocid_instance | jq -r '.data[]."public-ip"'`
+echo "[+] Public IP: $public_ip"
 
 
 # execute command on box
