@@ -73,18 +73,18 @@ C="$T"
 # Step: Get OCIDs (Oracle Cloud IDs) 
 # Ubuntu image
 # list images: oci compute image list --all -c $C --query "data[?\"operating-system\" == 'Canonical Ubuntu'] | [?contains(\"display-name\", 'aarch64')] | [?contains(\"display-name\", 'Minimal') == \`false\`] | [].\"display-name\"" 
-echo "[+] Getting Image ID"
 ocid_img=$(oci compute image list --all -c $C --query "data[?\"operating-system\" == 'Canonical Ubuntu'] | [?contains(\"display-name\", 'aarch64')] | [?contains(\"display-name\", 'Minimal') == \`false\`] | [0].id" --raw-output)
+echo "[+] Image ID: $ocid_img"
 
 # Get First Availability Domain
-echo "[+] Getting (first) Availability Domain ID"
 ocid_ad=`oci iam availability-domain list -c $C --query "data[0].name" --raw-output`
+echo "[+] (first) Availability Domain ID: $ocid_ad"
 
 ######
 # Get VCN (Virtual Cloud Network)
 vcn_name="openvpn-vcn"
-echo "[+] Getting Virtual Cloud Network named: $vcn_name"
 
+echo "[+] Checking Virtual Cloud Network named: $vcn_name"
 ocid_vcn=`oci network vcn list -c $C --display-name "$vcn_name" --query 'data[0].id' --raw-output`
 if [ -z "$ocid_vcn" ]; then
     echo "[!] Virtual Cloud Network not found, creating: "$vcn_name""
@@ -92,25 +92,25 @@ if [ -z "$ocid_vcn" ]; then
     new_vcn=`oci network vcn create -c $C --display-name "$vcn_name" --cidr-blocks '[ "10.0.0.0/16" ]' --dns-label openvpndns`
     ocid_vcn=`echo "$new_vcn" | jq -r '.data.id'`
 fi
+echo "[+] Virtual Cloud Network ID: $ocid_vcn"
 
 # Get VCN Subnet: 
-echo "[+] Getting (First) Subnet ID in Virtual Cloud Network"
 ocid_sub=`oci network subnet list -c $C --vcn-id $ocid_vcn --query 'data[0].id' --raw-output`
 if [ -z "$ocid_sub" ]; then
     echo "[!] Subnet not found, creating one."
     new_vcn_sub=`oci network subnet create -c $C --vcn-id $ocid_vcn --cidr-block '10.0.0.0/24' --dns-label subnetdns`
     ocid_sub=`echo "$new_vcn_sub" | jq -r '.data.id'`
 fi
+echo "[+] (First) Subnet ID in Virtual Cloud Network ID: $ocid_sub"
 
 # TO DO: Update Subnet params to allow ports
 # https://blogs.oracle.com/cloud-infrastructure/post/a-simple-guide-to-adding-rules-to-security-lists-using-oci-cli
-echo "[+] Getting (First) Security List in VCN"
 ocid_securiy_list=`oci network security-list list -c $C --vcn-id $ocid_vcn --query 'data[0].id' --raw-output`
+echo "[+] Getting (First) Security List in VCN: $ocid_security_list"
 
 
 ## TO DO
 # Create Internet Gateway, if needed (needed for VMs to reach the internet)
-echo "[+] Getting Internet Gateway"
 gateway_name="openvpn-gw"
 ocid_gateway=`oci network internet-gateway list -c $C --display-name $gateway_name --query 'data[0].id' --raw-output`
 if [ -z "$ocid_gateway" ]; then
@@ -118,13 +118,14 @@ if [ -z "$ocid_gateway" ]; then
     new_gateway=`oci network internet-gateway create -c $C --vcn-id $ocid_vcn --is-enabled true --display-name $gateway_name`
     ocid_gateway=`oci network internet-gateway list -c $C --display-name $gateway_name --query 'data[0].id' --raw-output`
 fi
+echo "[+] Getting Internet Gateway ($gateway_name): $ocid_gateway"
 
 
 # Updat Default Route Table (needed for VMs to reach the internet)
-echo "[+] Setting Default Route Table"
 ocid_route_table=`oci network route-table list -c $C --vcn-id $ocid_vcn --query 'data[0].id' --raw-output`
 route_rules='[{"cidrBlock":"0.0.0.0/0","networkEntityId":"'$ocid_gateway'"}]'
 oci network route-table update --rt-id $ocid_route_table --route-rules $route_rules --force > /dev/null 2>&1
+echo "[+] Default Route Table: $ocid_route_table"
 
 
 # TO DO: Crate/select security-list
