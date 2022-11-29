@@ -150,8 +150,8 @@ ocid_instance=$(oci compute instance launch --display-name "${instance_name}" --
 --raw-output)
 
 # unlikely failure tmp fix, should loop ssh cmd instead until alive
-echo "[+] VM awake, sleeping an extra 10 seconds to wake up SSH."
-sleep 10
+echo "[+] VM awake, sleeping an extra 60 seconds to wake up SSH."
+sleep 60
 
 echo "[+] Getting Public IP"
 public_ip=`oci compute instance list-vnics --instance-id $ocid_instance | jq -r '.data[]."public-ip"'`
