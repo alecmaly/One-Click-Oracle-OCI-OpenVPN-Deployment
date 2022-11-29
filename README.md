@@ -2,7 +2,7 @@
 
 This project is to simplify the process of creating OpenVPN servers on Oracle's OCI cloud. Their free offering is quite amazing, this is a great video by [IdeaSpot](https://ideaspot.com.au/) to get introduced: [https://www.youtube.com/watch?v=_m21FxvuQ4c](https://www.youtube.com/watch?v=_m21FxvuQ4c)
 
-These scripts can fail due to limitations on resources or other unhandled exceptions. However, they work well enough for my use case, hopefully someone else can use it too and/or improve it! 
+These scripts can fail due to limitations on resources or other unhandled exceptions. However, they work well enough for my use case. Perhaps someone else can use them and/or improve them!
 
 Note that key `id_rsa` is saved to `pwd` and can be copied offline to SSH into each VPS. 
 
