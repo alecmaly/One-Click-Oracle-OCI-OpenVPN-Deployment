@@ -148,6 +148,9 @@ printf "\n[+] Availability Domains: \n$ocid_ads\n"
 oci iam availability-domain list -c $C > availability_domains.json
 ads_count=`jq '.[] | length' availability_domains.json`
 
+instance_name="spaghetti"
+cpu_count=4
+memory_in_gb=24
 
 # loop until VM is created or unrecoverable failure
 done=0
@@ -182,7 +185,7 @@ until [[ "$done" -eq 1 ]]; do
         status=`echo $instance_output | jq -r '.data."lifecycle-state"'`
         ocid_instance=`echo $instance_output | jq -r '.data.id'`
         
-        if [ "$status" = "RUNNING" ]; then
+        if [[ "$status" == "RUNNING" ]]; then
             echo "[+] VM Created Successfully: $ocid_instance"
             done=1
             break
@@ -191,7 +194,6 @@ until [[ "$done" -eq 1 ]]; do
         fi
     done
 done
-
 
 
 # unlikely failure tmp fix, should loop ssh cmd instead until alive
