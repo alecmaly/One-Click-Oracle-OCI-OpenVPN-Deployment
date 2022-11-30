@@ -71,16 +71,6 @@ T=$(
 C="$T"
 
 
-# CHECK: Machine name must be unique for each subnet. This check does not validate subnet, only unique names. 
-# This should be changed if there are many VMs in the OCI environment in different subnets that 
-# are affecting the script from running. This should work well enough for basic/free uses. 
-has_current_instance=`oci compute instance list -c $C --display-name "$instance_name" --lifecycle-state RUNNING`
-echo "CURRENT INSTANCE? $has_current_instance"
-if ! [[ -z $has_current_instance ]]; then
-    echo "[!] Error: Machine name must be unique, try another machine name"
-    exit 1
-fi
-
 # Step: Get OCIDs (Oracle Cloud IDs) 
 # Ubuntu image
 # list images: oci compute image list --all -c $C --query "data[?\"operating-system\" == 'Canonical Ubuntu'] | [?contains(\"display-name\", 'aarch64')] | [?contains(\"display-name\", 'Minimal') == \`false\`] | [].\"display-name\"" 
@@ -157,19 +147,20 @@ until [[ "$done" -eq 1 ]]; do
         ad_id=`jq -r '.data['$i'].id' availability_domains.json`
         ad_name=`jq -r '.data['$i'].name' availability_domains.json`
 
+        hostname=`uuidgen`
         # Provision
         # STEP: Create Compute Instance (VM) + get public_ip
-        echo "[+] Trying to Create Compute Instance (VM / VPS) in Availability Domain: $ad_name"
+        echo "[+] Trying to Create Compute Instance VM ($instance_name) in Availability Domain: $ad_name"
         instance_output=$(oci compute instance launch --display-name "${instance_name}" --availability-domain "${ad_name}" -c "$C" --subnet-id "${ocid_sub}" --image-id "${ocid_img}" \
-        --shape "${shape}" \
-        --shape-config "{\"memory-in-gbs\":$memory_in_gb, \"ocpus\":\"$cpu_count\"}" \
-        --ssh-authorized-keys-file "id_rsa.pub" \
-        --assign-public-ip true \
-        --wait-for-state RUNNING \
-        --wait-for-state TERMINATED \
-        --wait-interval-seconds 5 \
-        --hostname-label "$instance_name" \
-        --raw-output)
+            --shape "${shape}" \
+            --shape-config "{\"memory-in-gbs\":$memory_in_gb, \"ocpus\":\"$cpu_count\"}" \
+            --ssh-authorized-keys-file "id_rsa.pub" \
+            --assign-public-ip true \
+            --wait-for-state RUNNING \
+            --wait-for-state TERMINATED \
+            --wait-interval-seconds 5 \
+            --hostname-label "$hostname" \
+            --raw-output)
 
         # if failed request (empty output), abort script
         if [ -z "$instance_output" ]; then
