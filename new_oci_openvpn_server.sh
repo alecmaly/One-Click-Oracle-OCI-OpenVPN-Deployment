@@ -139,6 +139,12 @@ ads_count=`jq '.[] | length' availability_domains.json`
 echo "[+] Availability Domains:"
 jq -r '.data[].name' availability_domains.json
 
+# assign to
+instance_name="meowmix"
+cpu_count=2
+memory_in_gb=12
+
+
 # loop until VM is created or unrecoverable failure
 done=0
 until [[ "$done" -eq 1 ]]; do
@@ -163,11 +169,11 @@ until [[ "$done" -eq 1 ]]; do
             --raw-output)
 
         # if failed request (empty output), abort script
-        if [ -z "$instance_output" ]; then
-            echo "[!] VM Provisioning FAILED, you should see an error message in the terminal... exiting script."
-            echo "[!] Try again with a different machine name - hostname must be unique for machines in the same subnet."
-            exit 1
-        fi
+        # if [ -z "$instance_output" ]; then
+        #     echo "[!] VM Provisioning FAILED, you should see an error message in the terminal... exiting script."
+        #     echo "[!] Try again with a different machine name - hostname must be unique for machines in the same subnet."
+        #     exit 1
+        # fi
 
         # If success, set done=1 + break, else possibly transiant error, try another Availability Domain
         status=`echo $instance_output | jq -r '.data."lifecycle-state"'`
