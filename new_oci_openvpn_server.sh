@@ -140,17 +140,11 @@ echo "[+] Updating Security List firewall rules for OpenVPN"
 network_ingress_rules='[ { "description": "TCP Port 22", "source": "0.0.0.0/0", "protocol": "6", "isStateless": true, "tcpOptions": { "destinationPortRange": { "max": 22, "min": 22 } } }, { "description": "TCP Port 443", "source": "0.0.0.0/0", "protocol": "6", "isStateless": true, "tcpOptions": { "destinationPortRange": { "max": 443, "min": 443 } } }, { "description": "TCP Port 943", "source": "0.0.0.0/0", "protocol": "6", "isStateless": true, "tcpOptions": { "destinationPortRange": { "max": 943, "min": 943 } } }, { "description": "UDP Port 1194", "source": "0.0.0.0/0", "protocol": "17", "isStateless": true, "udpOptions": { "destinationPortRange": { "max": 1194, "min": 1194 } } } ]'
 oci network security-list update --security-list-id $ocid_securiy_list --ingress-security-rules "$network_ingress_rules" --force > /dev/null 2>&1
 
-# Get First Availability Domains
-ocid_ads=`oci iam availability-domain list -c $C | jq -r .data[].name`
-printf "\n[+] Availability Domains: \n$ocid_ads\n"
-
 # Get All Availability Domains
 oci iam availability-domain list -c $C > availability_domains.json
 ads_count=`jq '.[] | length' availability_domains.json`
-
-instance_name="spaghetti"
-cpu_count=4
-memory_in_gb=24
+echo "[+] Availability Domains:"
+jq -r '.data[].name' availability_domains.json
 
 # loop until VM is created or unrecoverable failure
 done=0
