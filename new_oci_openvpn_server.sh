@@ -22,10 +22,18 @@ memory_in_gb=$3
 # valiate args are numbers
 re='^[0-9]+$' # regular expression - validate whole number
 if ! [[ $cpu_count =~ $re ]] ||  ! [[ $memory_in_gb =~ $re ]] ; then
-   echo "error: Parameters cpu_count and memory_in_gb should be whole numbers." >&2
+   echo "[!] Error: Parameters cpu_count and memory_in_gb should be whole numbers." >&2
    exit 1
 fi
 
+# Machine name must be unique for each subnet. This check does not validate subnet, only unique names. 
+# This should be changed if there are many VMs in the OCI environment in different subnets that 
+# are affecting the script from running. This should work well enough for basic/free uses. 
+has_current_instance=`oci compute instance list -c $C --display-name "$instance_name"`
+if ! [ -z $has_current_instance ]; then
+    echo "[!] Error: Machine name must be unique, try another machine name"
+    exit 1
+fi
 
 
 # download configure-server.sh
@@ -75,10 +83,6 @@ C="$T"
 # list images: oci compute image list --all -c $C --query "data[?\"operating-system\" == 'Canonical Ubuntu'] | [?contains(\"display-name\", 'aarch64')] | [?contains(\"display-name\", 'Minimal') == \`false\`] | [].\"display-name\"" 
 ocid_img=$(oci compute image list --all -c $C --query "data[?\"operating-system\" == 'Canonical Ubuntu'] | [?contains(\"display-name\", 'aarch64')] | [?contains(\"display-name\", 'Minimal') == \`false\`] | [0].id" --raw-output)
 echo "[+] Image ID: $ocid_img"
-
-# Get First Availability Domain
-ocid_ad=`oci iam availability-domain list -c $C --query "data[0].name" --raw-output`
-echo "[+] (first) Availability Domain ID: $ocid_ad"
 
 ######
 # Get VCN (Virtual Cloud Network)
@@ -136,18 +140,59 @@ echo "[+] Updating Security List firewall rules for OpenVPN"
 network_ingress_rules='[ { "description": "TCP Port 22", "source": "0.0.0.0/0", "protocol": "6", "isStateless": true, "tcpOptions": { "destinationPortRange": { "max": 22, "min": 22 } } }, { "description": "TCP Port 443", "source": "0.0.0.0/0", "protocol": "6", "isStateless": true, "tcpOptions": { "destinationPortRange": { "max": 443, "min": 443 } } }, { "description": "TCP Port 943", "source": "0.0.0.0/0", "protocol": "6", "isStateless": true, "tcpOptions": { "destinationPortRange": { "max": 943, "min": 943 } } }, { "description": "UDP Port 1194", "source": "0.0.0.0/0", "protocol": "17", "isStateless": true, "udpOptions": { "destinationPortRange": { "max": 1194, "min": 1194 } } } ]'
 oci network security-list update --security-list-id $ocid_securiy_list --ingress-security-rules "$network_ingress_rules" --force > /dev/null 2>&1
 
+# Get First Availability Domains
+ocid_ads=`oci iam availability-domain list -c $C | jq -r .data[].name`
+printf "\n[+] Availability Domains: \n$ocid_ads\n"
 
-# STEP: Create Compute Instance (VM) + get public_ip
-echo "[+] Creating Computue Instance (VM / VPS)"
-ocid_instance=$(oci compute instance launch --display-name "${instance_name}" --availability-domain "${ocid_ad}" -c "$C" --subnet-id "${ocid_sub}" --image-id "${ocid_img}" \
---shape "${shape}" \
---shape-config "{\"memory-in-gbs\":$memory_in_gb, \"ocpus\":\"$cpu_count\"}" \
---ssh-authorized-keys-file "id_rsa.pub" \
---assign-public-ip true \
---wait-for-state RUNNING \
---query 'data.id' \
---hostname-label "$instance_name" \
---raw-output)
+# Get All Availability Domains
+oci iam availability-domain list -c $C > availability_domains.json
+ads_count=`jq '.[] | length' availability_domains.json`
+
+
+# loop until VM is created or unrecoverable failure
+done=0
+until [[ "$done" -eq 1 ]]; do
+    # For each Availability Domain
+    for ((i=0; i<$ads_count; i++)); do
+        ad_id=`jq -r '.data['$i'].id' availability_domains.json`
+        ad_name=`jq -r '.data['$i'].name' availability_domains.json`
+
+        # Provision
+        # STEP: Create Compute Instance (VM) + get public_ip
+        echo "[+] Trying to Create Computue Instance (VM / VPS) in Availability Domain: $ad_name"
+        instance_output=$(oci compute instance launch --display-name "${instance_name}" --availability-domain "${ad_name}" -c "$C" --subnet-id "${ocid_sub}" --image-id "${ocid_img}" \
+        --shape "${shape}" \
+        --shape-config "{\"memory-in-gbs\":$memory_in_gb, \"ocpus\":\"$cpu_count\"}" \
+        --ssh-authorized-keys-file "id_rsa.pub" \
+        --assign-public-ip true \
+        --wait-for-state RUNNING \
+        --wait-for-state TERMINATED \
+        --wait-interval-seconds 5 \
+        --hostname-label "$instance_name" \
+        --raw-output)
+
+        # if failed request (empty output), abort script
+        if [ -z "$instance_output" ]; then
+            echo "[!] VM Provisioning FAILED, you should see an error message in the terminal... exiting script."
+            echo "[!] Try again with a different machine name - hostname must be unique for machines in the same subnet."
+            exit 1
+        fi
+
+        # If success, set done=1 + break, else possibly transiant error, try another Availability Domain
+        status=`echo $instance_output | jq -r '.data."lifecycle-state"'`
+        ocid_instance=`echo $instance_output | jq -r '.data.id'`
+        
+        if [ "$status" = "RUNNING" ]; then
+            echo "[+] VM Created Successfully: $ocid_instance"
+            done=1
+            # break
+        else
+            echo "[!] ERROR Provisioning VM, state is: $status"
+        fi
+    done
+done
+
+
 
 # unlikely failure tmp fix, should loop ssh cmd instead until alive
 echo "[+] VM awake, sleeping an extra 60 seconds to wake up SSH."
