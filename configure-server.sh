@@ -71,8 +71,9 @@ sacli --user "openvpn" --new_pass "$openvpn_password" SetLocalPassword
 # - 
 
 
+
 public_ip=`curl -s ip.me`
-echo "------- OpenVPN should be running on a fresh box! -------"
+echo "------- OpenVPN should be configured on a fresh box! Please wait for reboot, if needed. -------"
 echo "---------- Copy / paste to Password Manager -------------"
 printf "\nAdmin  UI: https://$public_ip:943/admin\n"
 printf "Client UI: https://$public_ip:943\n\n"
@@ -84,3 +85,6 @@ echo "---------- + update passwords if desired ----------------"
 # clear .bash_history
 cat /dev/null > ~/.bash_history
 echo "Done."
+
+# Should probably reboot since we upgraded OS, may uncomment in the future.
+# reboot
