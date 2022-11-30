@@ -75,6 +75,7 @@ C="$T"
 # This should be changed if there are many VMs in the OCI environment in different subnets that 
 # are affecting the script from running. This should work well enough for basic/free uses. 
 has_current_instance=`oci compute instance list -c $C --display-name "$instance_name" --lifecycle-state RUNNING`
+echo "CURRENT INSTANCE? $has_current_instance"
 if ! [[ -z $has_current_instance ]]; then
     echo "[!] Error: Machine name must be unique, try another machine name"
     exit 1
