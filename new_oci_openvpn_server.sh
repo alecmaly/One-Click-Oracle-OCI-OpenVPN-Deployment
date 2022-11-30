@@ -159,7 +159,7 @@ until [[ "$done" -eq 1 ]]; do
 
         # Provision
         # STEP: Create Compute Instance (VM) + get public_ip
-        echo "[+] Trying to Create Computue Instance (VM / VPS) in Availability Domain: $ad_name"
+        echo "[+] Trying to Create Compute Instance (VM / VPS) in Availability Domain: $ad_name"
         instance_output=$(oci compute instance launch --display-name "${instance_name}" --availability-domain "${ad_name}" -c "$C" --subnet-id "${ocid_sub}" --image-id "${ocid_img}" \
         --shape "${shape}" \
         --shape-config "{\"memory-in-gbs\":$memory_in_gb, \"ocpus\":\"$cpu_count\"}" \

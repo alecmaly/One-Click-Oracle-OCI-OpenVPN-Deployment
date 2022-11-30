@@ -77,7 +77,7 @@ echo "---------- Copy / paste to Password Manager -------------"
 printf "\nAdmin  UI: https://$public_ip:943/admin\n"
 printf "Client UI: https://$public_ip:943\n\n"
 printf "Admin Credentials:\n\tusername: openvpn\n\tpassword: $openvpn_password\n"
-printf "User  Crednetials:\n\tusername: $username\n\tpassword: $password\n"
+printf "User  Credentials:\n\tusername: $username\n\tpassword: $password\n"
 printf "\n\tUser Profile URL: $user_profile_token_url\n\tProfile QR: https://chart.apis.google.com/chart?cht=qr&chs=300x300&chl=$user_profile_token_url\n\n"
 echo "---------- + update passwords if desired ----------------"
 
