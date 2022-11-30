@@ -29,7 +29,7 @@ fi
 
 
 # download configure-server.sh
-echo "[!] Downloading configure-server.sh, will be executed on VPN once it is RUNNING..."
+echo "[+] Downloading configure-server.sh, will be executed on VPN once it is RUNNING..."
 wget -q "https://raw.githubusercontent.com/alecmaly/One-Click-Oracle-OCI-OpenVPN-Deployment/main/configure-server.sh" -O configure-server.sh
 
 
