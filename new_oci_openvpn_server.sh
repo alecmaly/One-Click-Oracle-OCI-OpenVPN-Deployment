@@ -185,7 +185,7 @@ until [[ "$done" -eq 1 ]]; do
         if [ "$status" = "RUNNING" ]; then
             echo "[+] VM Created Successfully: $ocid_instance"
             done=1
-            # break
+            break
         else
             echo "[!] ERROR Provisioning VM, state is: $status"
         fi
