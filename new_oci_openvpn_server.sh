@@ -27,7 +27,7 @@ if ! [[ $cpu_count =~ $re ]] ||  ! [[ $memory_in_gb =~ $re ]] ; then
 fi
 
 # output message
-echo -e "\e[32mThis script loops forever until a VM is created, ensure you are not out of limits.\e[0m"
+echo -e "\e[32m[!] This script loops forever until a VM is created, ensure you are not out of limits.\e[0m"
 echo -e "\e[32mExit script with: Ctrl+C\e[0m"
 
 # download configure-server.sh
