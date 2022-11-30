@@ -139,12 +139,6 @@ ads_count=`jq '.[] | length' availability_domains.json`
 echo "[+] Availability Domains:"
 jq -r '.data[].name' availability_domains.json
 
-# assign to
-instance_name="meowmix"
-cpu_count=2
-memory_in_gb=12
-
-
 # loop until VM is created or unrecoverable failure
 done=0
 until [[ "$done" -eq 1 ]]; do
