@@ -18,7 +18,7 @@ apt-get update &&
 apt install -y ca-certificates wget net-tools gnupg jq
 
 wget https://as-repository.openvpn.net/as-repo-public.asc -qO /etc/apt/trusted.gpg.d/as-repository.asc
-echo "deb [arch=arm64 signed-by=/etc/apt/trusted.gpg.d/as-repository.asc] http://as-repository.openvpn.net/as/debian jammy main">/etc/apt/sources.list.d/openvpn-as-repo.list
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/trusted.gpg.d/as-repository.asc] http://as-repository.openvpn.net/as/debian $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/openvpn-as-repo.list
 apt update && apt -y install openvpn-as
 
 
@@ -79,7 +79,7 @@ printf "\nAdmin  UI: https://$public_ip:943/admin\n"
 printf "Client UI: https://$public_ip:943\n\n"
 printf "Admin Credentials:\n\tusername: openvpn\n\tpassword: $openvpn_password\n"
 printf "User  Credentials:\n\tusername: $username\n\tpassword: $password\n"
-printf "\n\tUser Profile URL: $user_profile_token_url\n\tProfile QR: https://chart.apis.google.com/chart?cht=qr&chs=300x300&chl=$user_profile_token_url\n\n"
+printf "\n\tUser Profile URL: $user_profile_token_url\n\tProfile QR: https://quickchart.io/qr?text=$user_profile_token_url\n\n"
 echo "---------- + update passwords if desired ----------------"
 
 # clear .bash_history
